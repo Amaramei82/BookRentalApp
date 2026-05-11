@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:book_rental_system/screens/admin_login_screen.dart';
 import 'package:book_rental_system/screens/registration_screen.dart';
 import 'package:book_rental_system/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +19,6 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       // The SplashScreen is the correct entry point for the non-Firebase version.
       home: const SplashScreen(),
-      routes: {
-        '/admin_login': (context) => const AdminLoginScreen(),
-      },
     );
   }
 }

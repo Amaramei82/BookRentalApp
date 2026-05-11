@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:book_rental_system/screens/book_detail_screen.dart';
 import 'package:book_rental_system/screens/genre_selection_screen.dart';
+import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -24,34 +25,51 @@ class HomeScreen extends StatelessWidget {
     final List<Map<String, String>> recentlyAddedBooks = allBooks.length > 4 ? allBooks.sublist(4) : [];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Make AppBar transparent
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(8.0),
           child: Image.asset('assets/images/logo.png'),
         ),
+        title: const Text(
+          'BookRental',
+          style: TextStyle(
+            color: darkGreen,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            letterSpacing: -0.3,
+          ),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.explore_outlined, color: Colors.black, size: 28),
-            tooltip: 'Browse Genres',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => GenreSelectionScreen(
-                    onOrderPlaced: onOrderPlaced,
-                    isBookRented: isBookRented,
-                    allBooks: allBooks,
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: darkGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.explore_outlined, color: darkGreen, size: 24),
+              tooltip: 'Browse Genres',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => GenreSelectionScreen(
+                      onOrderPlaced: onOrderPlaced,
+                      isBookRented: isBookRented,
+                      allBooks: allBooks,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),
       body: Stack(
         children: [
+          // Background image with parallax effect (static for design)
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -60,39 +78,68 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Semi‑transparent gradient overlay for better readability
           Container(
-            color: Colors.white.withOpacity(0.85), // Subtle white layer
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withOpacity(0.92),
+                  Colors.grey.shade50.withOpacity(0.95),
+                ],
+              ),
+            ),
           ),
           SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by title, author, or genre...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true, // Add a fill color for better visibility
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                // Modern search bar with shadow and rounded corners
+                Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by title, author, or genre...',
+                      hintStyle: TextStyle(color: Colors.grey.shade500),
+                      prefixIcon: const Icon(Icons.search, color: darkGreen),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(color: darkGreen, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Browse Books'),
                 const SizedBox(height: 16),
                 _buildBookCarousel(filteredBooks, context),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Recently Added'),
                 const SizedBox(height: 16),
                 _buildBookCarousel(recentlyAddedBooks, context),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -102,25 +149,62 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black, // Ensure title is visible
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 24,
+          decoration: BoxDecoration(
+            color: darkGreen,
+            borderRadius: BorderRadius.circular(2),
           ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.black87,
+            letterSpacing: -0.3,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildBookCarousel(List<Map<String, String>> books, BuildContext context) {
+    if (books.isEmpty) {
+      return SizedBox(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No books available',
+            style: TextStyle(color: Colors.grey.shade500),
+          ),
+        ),
+      );
+    }
     return SizedBox(
-      height: 280,
+      height: 290,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: books.length,
         itemBuilder: (context, index) {
           final book = books[index];
-          return SizedBox(
-            width: 170,
+          return TweenAnimationBuilder<double>(
+            duration: Duration(milliseconds: 300 + (index * 50)),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(20 * (1 - value), 0),
+                  child: child,
+                ),
+              );
+            },
             child: _BookCard(
               book: book,
               onOrderPlaced: onOrderPlaced,
@@ -158,72 +242,138 @@ class _BookCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        margin: const EdgeInsets.only(right: 16.0),
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        elevation: 4.0, // Add more elevation for visibility
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: book['image']!.startsWith('assets/')
-                      ? Image.asset(
+      child: Container(
+        width: 170,
+        margin: const EdgeInsets.only(right: 16),
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 6,
+          shadowColor: Colors.black.withOpacity(0.15),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Book cover image
+                  Expanded(
+                    flex: 3,
+                    child: Hero(
+                      tag: 'book_${book['title']}',
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        child: (book['image']?.startsWith('assets/') ?? false)
+                            ? Image.asset(
                           book['image']!,
                           width: double.infinity,
-                          fit: BoxFit.cover)
-                      : Image.file(
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                          ),
+                        )
+                            : Image.file(
                           File(book['image']!),
                           width: double.infinity,
-                          fit: BoxFit.cover),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        book['title']!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        book['author']!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  // Book info
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
                       ),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            book['title']!,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline, size: 12, color: Colors.grey.shade500),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  book['author']!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            if (isRented)
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Rented',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ),
+                ],
               ),
-          ],
+              // Rented badge (top‑right corner)
+              if (isRented)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Colors.redAccent, Colors.red],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.redAccent.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_outline, color: Colors.white, size: 12),
+                        SizedBox(width: 4),
+                        Text(
+                          'Rented',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
