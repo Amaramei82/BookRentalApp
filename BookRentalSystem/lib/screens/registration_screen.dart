@@ -16,6 +16,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _authService = AuthService();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _mobileController = TextEditingController(); // Added for UI only
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -25,6 +26,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
+    _mobileController.dispose(); // Dispose mobile controller
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -193,6 +195,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 validator: (v) => v!.isEmpty ? 'Please enter your email' : null,
                               ),
                               const SizedBox(height: 20),
+                              // Mobile number field (UI only – no validator)
+                              _buildInputField(
+                                controller: _mobileController,
+                                label: 'Mobile Number',
+                                icon: Icons.phone_android_outlined,
+                                keyboardType: TextInputType.phone,
+                                // No validator – purely decorative
+                              ),
+                              const SizedBox(height: 20),
                               // Password field
                               _buildInputField(
                                 controller: _passwordController,
@@ -311,7 +322,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                   ),
-
                 ),
               ),
             ],
@@ -371,7 +381,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
-      validator: validator,
+      validator: validator, // Mobile field passes null => no validation
     );
   }
 }
