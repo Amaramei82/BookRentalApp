@@ -31,7 +31,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final String selectedDuration = durations[_selectedDuration];
     final double selectedMultiplier = durationMultipliers[_selectedDuration];
 
-    const double basePrice = 9.99;
+    const double basePrice = 10.00;
     final double totalPrice = basePrice * selectedMultiplier;
 
     showDialog(
@@ -40,102 +40,53 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 8,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey.shade50],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: darkGreen.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.receipt_long_rounded, color: darkGreen, size: 32),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Confirm Your Order',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildOrderRow('Book', widget.book['title']!),
-                        const Divider(height: 1, indent: 16, endIndent: 16),
-                        _buildOrderRow('Condition', selectedCondition),
-                        const Divider(height: 1, indent: 16, endIndent: 16),
-                        _buildOrderRow('Duration', selectedDuration),
-                        const Divider(height: 1, indent: 16, endIndent: 16),
-                        _buildOrderRow('Base Price', '\$${basePrice.toStringAsFixed(2)}'),
-                        const Divider(height: 1, indent: 16, endIndent: 16),
-                        _buildTotalRow('Total Amount', '\$${totalPrice.toStringAsFixed(2)}'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            side: BorderSide(color: Colors.grey.shade400),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
-                        ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.receipt_long_rounded, color: darkGreen, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'Confirm Your Order',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                _buildOrderRow('Book', widget.book['title']!),
+                _buildOrderRow('Condition', selectedCondition),
+                _buildOrderRow('Duration', selectedDuration),
+                const Divider(),
+                _buildOrderRow('Total Amount', '₹${totalPrice.toStringAsFixed(2)}', isBold: true),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: darkGreen,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: darkGreen),
+                        onPressed: () {
+                          widget.onOrderPlaced(widget.book, totalPrice);
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Order placed successfully!'),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
                             ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            widget.onOrderPlaced(widget.book, totalPrice);
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Order placed successfully!'),
-                                backgroundColor: Colors.green,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
-                          child: const Text('Confirm Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
+                          );
+                        },
+                        child: const Text('Confirm', style: TextStyle(color: Colors.white)),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -143,33 +94,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     );
   }
 
-  Widget _buildOrderRow(String label, String value) {
+  Widget _buildOrderRow(String label, String value, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 15, color: Colors.black54)),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTotalRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: darkGreen),
-          ),
+          Text(label, style: TextStyle(color: isBold ? Colors.black : Colors.black54, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+          Text(value, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.w500)),
         ],
       ),
     );
@@ -182,253 +114,233 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final List<String> durations = ['7 days', '14 days', '30 days'];
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text(
-          widget.book['title']!,
-          style: const TextStyle(color: darkGreen, fontWeight: FontWeight.bold, letterSpacing: -0.3),
-          overflow: TextOverflow.ellipsis,
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF1A1F24), // Dark navbar from design
         elevation: 0,
-        iconTheme: const IconThemeData(color: darkGreen),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Colors.transparent],
-              stops: [0.0, 1.0],
-            ),
-          ),
+        toolbarHeight: 70,
+        leadingWidth: 100,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
         ),
+        actions: [
+          _buildHeaderLink('Home'),
+          _buildHeaderLink('Book Categories'),
+          _buildHeaderLink('Contact Us'),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Book cover with animation
-            Center(
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeOutCubic,
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.scale(
-                      scale: 0.9 + (value * 0.1),
-                      child: child,
+          children: [
+            // Top Section: Image and Details
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                  ],
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Book Cover
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: _buildImage(widget.book['image']!),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    // Details
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.book['title']!,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF111827),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildDetailRow('ISBN:', '978-1-61-268019-4'), // Placeholder as in design
+                          _buildDetailRow('Author:', widget.book['author']!),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              const Text(
+                                '₹10',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2563EB),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                '(Per Day)',
+                                style: TextStyle(color: Colors.black54, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: isRented ? null : () => _showOrderConfirmation(context),
+                            icon: const Icon(Icons.calendar_month, color: Colors.white, size: 18),
+                            label: Text(isRented ? 'Already Rented' : 'Rent this book', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: darkGreen,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Rental Selection Section (Condition and Duration)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Select Rental Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: darkGreen)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildChoiceSection('Condition', conditions, _selectedCondition, (val) => setState(() => _selectedCondition = val)),
+                      const SizedBox(width: 24),
+                      _buildChoiceSection('Duration', durations, _selectedDuration, (val) => setState(() => _selectedDuration = val)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Short Description Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.notes, color: Colors.black, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Short Description',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: SizedBox(
-                      height: 320,
-                      width: 220,
-                      child: _buildImage(widget.book['image']!),
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.book['description'] ?? 'No description available for this book.',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF4B5563),
+                      height: 1.6,
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-            const SizedBox(height: 28),
-            // Title, author, genre
-            Text(
-              widget.book['title']!,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 26,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
-                const SizedBox(width: 6),
-                Text(
-                  widget.book['author']!,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: lightGreen.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                widget.book['genre']!,
-                style: const TextStyle(color: darkGreen, fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Description
-            const Text(
-              'Description',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.3),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.book['description'] ?? 'No description available.',
-              style: TextStyle(fontSize: 14, height: 1.5, color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 24),
-            // Condition section
-            const Text('Condition', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 12,
-              children: List.generate(conditions.length, (index) {
-                return ChoiceChip(
-                  label: Text(conditions[index]),
-                  selected: _selectedCondition == index,
-                  selectedColor: darkGreen,
-                  backgroundColor: Colors.white,
-                  labelStyle: TextStyle(
-                    color: _selectedCondition == index ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: BorderSide(color: _selectedCondition == index ? Colors.transparent : Colors.grey.shade300),
-                  ),
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedCondition = selected ? index : _selectedCondition;
-                    });
-                  },
-                );
-              }),
-            ),
-            const SizedBox(height: 24),
-            // Rental Duration section
-            const Text('Rental Duration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 12,
-              children: List.generate(durations.length, (index) {
-                return ChoiceChip(
-                  label: Text(durations[index]),
-                  selected: _selectedDuration == index,
-                  selectedColor: darkGreen,
-                  backgroundColor: Colors.white,
-                  labelStyle: TextStyle(
-                    color: _selectedDuration == index ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: BorderSide(color: _selectedDuration == index ? Colors.transparent : Colors.grey.shade300),
-                  ),
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedDuration = selected ? index : _selectedDuration;
-                    });
-                  },
-                );
-              }),
             ),
             const SizedBox(height: 40),
-            // Order button with gradient when enabled
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                ),
-                onPressed: isRented ? null : () => _showOrderConfirmation(context),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: isRented
-                        ? const LinearGradient(colors: [Colors.grey, Colors.grey])
-                        : const LinearGradient(
-                      colors: [darkGreen, Color(0xFF2E7D64)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: isRented
-                        ? []
-                        : [
-                      BoxShadow(
-                        color: darkGreen.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      isRented ? 'Already Rented' : 'Order Now',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildHeaderLink(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextButton(
+        onPressed: () {},
+        child: Text(title, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          const SizedBox(width: 8),
+          Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChoiceSection(String title, List<String> options, int selectedIndex, Function(int) onSelected) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: List.generate(options.length, (index) {
+            final isSelected = selectedIndex == index;
+            return ChoiceChip(
+              label: Text(options[index], style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontSize: 12)),
+              selected: isSelected,
+              selectedColor: darkGreen,
+              onSelected: (selected) => onSelected(index),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
   Widget _buildImage(String imagePath) {
     if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey.shade200,
-          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-        ),
-      );
+      return Image.network(imagePath, fit: BoxFit.contain);
     } else if (imagePath.startsWith('assets/')) {
-      return Image.asset(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey.shade200,
-          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-        ),
-      );
+      return Image.asset(imagePath, fit: BoxFit.contain);
     } else {
-      return Image.file(
-        File(imagePath),
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Colors.grey.shade200,
-          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-        ),
-      );
+      return Image.file(File(imagePath), fit: BoxFit.contain);
     }
   }
 }
