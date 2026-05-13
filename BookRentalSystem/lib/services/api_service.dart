@@ -5,7 +5,7 @@ class ApiService {
 
   // ANDROID EMULATOR URL
   static const String baseUrl =
-      "http://10.0.2.2/book-rental-website/api";
+      "http://192.168.100.1/book-rental-website/api";
 
   /// GET BOOKS
   static Future<List<dynamic>> getBooks() async {
