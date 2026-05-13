@@ -22,7 +22,7 @@ class User {
 
 class AuthService {
   // Replace with your actual IP (use 10.0.2.2 for Android Emulator)
-  static const String baseUrl = "http://192.168.100.1/book_rental/api";
+  static const String baseUrl = "http://10.0.2.2:3001";
 
   // SINGELTON PATTERN
   static final AuthService _instance = AuthService._internal();
@@ -34,22 +34,25 @@ class AuthService {
     required String fullName,
     required String email,
     required String password,
-    String mobile = "0000000000", // Default value if UI doesn't have it yet
+    String mobile = "0000000000",
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/register.php"),
-        body: {
+        Uri.parse("$baseUrl/register"), // Removed .php
+        headers: {"Content-Type": "application/json"}, // Tell Node.js we are sending JSON
+        body: json.encode({ // Use json.encode for Node.js compatibility
           'name': fullName,
           'email': email,
           'mobile': mobile,
           'password': password,
-        },
+        }),
       );
 
       final data = json.decode(response.body);
-      return data['status'] == 'success' ? 'Success' : data['message'];
+      // Node.js returns { success: true }, not { status: 'success' }
+      return data['success'] == true ? 'Success' : data['message'];
     } catch (e) {
+      print("Registration Error: $e"); // Check your debug console for specific errors
       return "Connection error. Please try again.";
     }
   }
@@ -61,16 +64,17 @@ class AuthService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/login.php"),
-        body: {
+        Uri.parse("$baseUrl/login"), // Removed .php
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
           'email': email,
           'password': password,
-        },
+        }),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['status'] == 'success') {
+        if (data['success'] == true) { // Check for 'success' boolean
           return User.fromJson(data['user']);
         }
       }
