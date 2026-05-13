@@ -46,7 +46,7 @@ class HomeScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: darkGreen.withOpacity(0.1),
+              color: darkGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
             ),
             child: IconButton(
@@ -69,7 +69,6 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background image with parallax effect (static for design)
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -78,15 +77,14 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Semi‑transparent gradient overlay for better readability
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withOpacity(0.92),
-                  Colors.grey.shade50.withOpacity(0.95),
+                  Colors.white.withValues(alpha: 0.92),
+                  Colors.grey.shade50.withValues(alpha: 0.95),
                 ],
               ),
             ),
@@ -96,12 +94,11 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // Modern search bar with shadow and rounded corners
                 Container(
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -162,7 +159,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           title,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: 22,
             color: Colors.black87,
@@ -192,24 +189,10 @@ class HomeScreen extends StatelessWidget {
         itemCount: books.length,
         itemBuilder: (context, index) {
           final book = books[index];
-          return TweenAnimationBuilder<double>(
-            duration: Duration(milliseconds: 300 + (index * 50)),
-            curve: Curves.easeOutCubic,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(20 * (1 - value), 0),
-                  child: child,
-                ),
-              );
-            },
-            child: _BookCard(
-              book: book,
-              onOrderPlaced: onOrderPlaced,
-              isRented: isBookRented(book['title']!),
-            ),
+          return _BookCard(
+            book: book,
+            onOrderPlaced: onOrderPlaced,
+            isRented: isBookRented(book['title']!),
           );
         },
       ),
@@ -251,42 +234,22 @@ class _BookCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           elevation: 6,
-          shadowColor: Colors.black.withOpacity(0.15),
+          shadowColor: Colors.black.withValues(alpha: 0.15),
           child: Stack(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Book cover image
                   Expanded(
                     flex: 3,
                     child: Hero(
                       tag: 'book_${book['title']}',
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                        child: (book['image']?.startsWith('assets/') ?? false)
-                            ? Image.asset(
-                          book['image']!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                          ),
-                        )
-                            : Image.file(
-                          File(book['image']!),
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                          ),
-                        ),
+                        child: _buildImage(book['image']!),
                       ),
                     ),
                   ),
-                  // Book info
                   Expanded(
                     flex: 2,
                     child: Container(
@@ -333,7 +296,6 @@ class _BookCard extends StatelessWidget {
                   ),
                 ],
               ),
-              // Rented badge (top‑right corner)
               if (isRented)
                 Positioned(
                   top: 12,
@@ -349,7 +311,7 @@ class _BookCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.redAccent.withOpacity(0.3),
+                          color: Colors.redAccent.withValues(alpha: 0.3),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -375,6 +337,40 @@ class _BookCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildErrorImage(),
+      );
+    } else if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildErrorImage(),
+      );
+    } else {
+      return Image.file(
+        File(imagePath),
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildErrorImage(),
+      );
+    }
+  }
+
+  Widget _buildErrorImage() {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(
+        child: Icon(Icons.book, size: 50, color: Colors.grey),
       ),
     );
   }

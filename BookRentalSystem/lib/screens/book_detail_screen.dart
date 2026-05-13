@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +57,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: darkGreen.withOpacity(0.1),
+                      color: darkGreen.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.receipt_long_rounded, color: darkGreen, size: 32),
@@ -228,7 +229,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -239,14 +240,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     child: SizedBox(
                       height: 320,
                       width: 220,
-                      child: Image.asset(
-                        widget.book['image']!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-                        ),
-                      ),
+                      child: _buildImage(widget.book['image']!),
                     ),
                   ),
                 ),
@@ -277,7 +271,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: lightGreen.withOpacity(0.2),
+                color: lightGreen.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Text(
@@ -378,7 +372,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         ? []
                         : [
                       BoxShadow(
-                        color: darkGreen.withOpacity(0.3),
+                        color: darkGreen.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -405,5 +399,36 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
+        ),
+      );
+    } else if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
+        ),
+      );
+    } else {
+      return Image.file(
+        File(imagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
+        ),
+      );
+    }
   }
 }
