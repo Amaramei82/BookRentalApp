@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class User {
@@ -9,72 +10,73 @@ class User {
 
   User({this.id, required this.fullName, required this.email, required this.mobile});
 
-  // Helper to create a User object from JSON returned by the PHP API
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'].toString(),
-      fullName: json['name'],
-      email: json['email'],
-      mobile: json['mobile'],
+      fullName: json['name'] ?? '',
+      email: json['email'] ?? '',
+      mobile: json['mobile'] ?? '',
     );
   }
 }
 
 class AuthService {
-  // Replace with your actual IP (use 10.0.2.2 for Android Emulator)
-  static const String baseUrl = "http://10.0.2.2:3001";
+  // ⚠️ IMPORTANT: Change 10.0.2.2 to your computer's Local IP (e.g. 192.168.1.XX) 
+  // if you are using a physical phone via USB.
+  static const String baseUrl = "http://192.168.100.1";
 
-  // SINGELTON PATTERN
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal();
 
-  // REGISTER USER
   Future<String> registerUser({
     required String fullName,
     required String email,
     required String password,
-    String mobile = "0000000000",
+    required String mobile,
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/register"), // Removed .php
-        headers: {"Content-Type": "application/json"}, // Tell Node.js we are sending JSON
-        body: json.encode({ // Use json.encode for Node.js compatibility
+        Uri.parse("$baseUrl/register"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({
           'name': fullName,
           'email': email,
           'mobile': mobile,
           'password': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 10)); // Stop waiting after 10 seconds
 
-      final data = json.decode(response.body);
-      // Node.js returns { success: true }, not { status: 'success' }
-      return data['success'] == true ? 'Success' : data['message'];
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        return data['success'] == true ? 'Success' : (data['message'] ?? 'Registration failed');
+      } else {
+        return "Server error: ${response.statusCode}";
+      }
+    } on TimeoutException {
+      return "Connection timed out. Check your IP address and Server.";
     } catch (e) {
-      print("Registration Error: $e"); // Check your debug console for specific errors
-      return "Connection error. Please try again.";
+      return "Connection error: $e";
     }
   }
 
-  // LOGIN USER
   Future<User?> loginUser({
     required String email,
     required String password,
   }) async {
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/login"), // Removed .php
+        Uri.parse("$baseUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           'email': email,
           'password': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['success'] == true) { // Check for 'success' boolean
+        if (data['success'] == true) {
           return User.fromJson(data['user']);
         }
       }

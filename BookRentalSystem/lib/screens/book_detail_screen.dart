@@ -19,99 +19,71 @@ class BookDetailScreen extends StatefulWidget {
 }
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
-  int _selectedCondition = 0;
-  int _selectedDuration = 0;
+  final TextEditingController _durationController = TextEditingController(text: '1');
 
-  void _showOrderConfirmation(BuildContext context) {
-    final List<String> conditions = ['New', 'Used'];
-    final List<String> durations = ['7 days', '14 days', '30 days'];
-    final List<double> durationMultipliers = [1.0, 1.5, 2.2];
+  @override
+  void dispose() {
+    _durationController.dispose();
+    super.dispose();
+  }
 
-    final String selectedCondition = conditions[_selectedCondition];
-    final String selectedDuration = durations[_selectedDuration];
-    final double selectedMultiplier = durationMultipliers[_selectedDuration];
+  void _processRental() {
+    final int? duration = int.tryParse(_durationController.text);
+    if (duration == null || duration <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid duration in days.')),
+      );
+      return;
+    }
 
     const double basePrice = 10.00;
-    final double totalPrice = basePrice * selectedMultiplier;
+    final double totalPrice = basePrice * duration;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          elevation: 8,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.receipt_long_rounded, color: darkGreen, size: 48),
-                const SizedBox(height: 16),
-                const Text(
-                  'Confirm Your Order',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                _buildOrderRow('Book', widget.book['title']!),
-                _buildOrderRow('Condition', selectedCondition),
-                _buildOrderRow('Duration', selectedDuration),
-                const Divider(),
-                _buildOrderRow('Total Amount', '₹${totalPrice.toStringAsFixed(2)}', isBold: true),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: darkGreen),
-                        onPressed: () {
-                          widget.onOrderPlaced(widget.book, totalPrice);
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Order placed successfully!'),
-                              backgroundColor: Colors.green,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        child: const Text('Confirm', style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        return AlertDialog(
+          title: const Text('Confirm Rental'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Book: ${widget.book['title']}'),
+              Text('Duration: $duration days'),
+              const Divider(),
+              Text('Total Price: ₹${totalPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: darkGreen),
+              onPressed: () {
+                widget.onOrderPlaced(widget.book, totalPrice);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Order placed successfully!'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
       },
-    );
-  }
-
-  Widget _buildOrderRow(String label, String value, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: isBold ? Colors.black : Colors.black54, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-          Text(value, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.w500)),
-        ],
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isRented = widget.isBookRented(widget.book['title']!);
-    final List<String> conditions = ['New', 'Used'];
-    final List<String> durations = ['7 days', '14 days', '30 days'];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -128,33 +100,46 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           _buildHeaderLink('Home'),
           _buildHeaderLink('Book Categories'),
           _buildHeaderLink('Contact Us'),
+          _buildHeaderLink('My Orders'),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Center(
+              child: Row(
+                children: [
+                  Icon(Icons.account_circle, color: Colors.white70, size: 20),
+                  SizedBox(width: 4),
+                  Text('User', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Section: Image and Details
+            // Top Section: Image and Details Card
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Colors.grey.shade100),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 15,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(32),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Book Cover
+                    // Left Side: Book Cover
                     Expanded(
                       flex: 2,
                       child: Container(
@@ -163,8 +148,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -174,52 +159,103 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 24),
-                    // Details
+                    const SizedBox(width: 40),
+                    // Right Side: Details
                     Expanded(
-                      flex: 3,
+                      flex: 4,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.book['title']!,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 32,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFF111827),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          _buildDetailRow('ISBN:', '978-1-61-268019-4'), // Placeholder as in design
-                          _buildDetailRow('Author:', widget.book['author']!),
                           const SizedBox(height: 24),
+                          const Divider(height: 1),
+                          const SizedBox(height: 24),
+                          _buildDetailRow('ISBN:', '978-9-35-141670-8'), // Matches image
+                          _buildDetailRow('Author:', widget.book['author']!),
+                          const SizedBox(height: 32),
                           Row(
                             children: [
                               const Text(
                                 '₹10',
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF2563EB),
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 8),
                               const Text(
                                 '(Per Day)',
-                                style: TextStyle(color: Colors.black54, fontSize: 14),
+                                style: TextStyle(color: Colors.black54, fontSize: 16),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed: isRented ? null : () => _showOrderConfirmation(context),
-                            icon: const Icon(Icons.calendar_month, color: Colors.white, size: 18),
-                            label: Text(isRented ? 'Already Rented' : 'Rent this book', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: darkGreen,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                              elevation: 0,
+                          const SizedBox(height: 32),
+                          // Duration Input and Rent Button Section
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time_filled, size: 18, color: Colors.black87),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      'Enter duration (in days)',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.grey.shade300),
+                                        ),
+                                        child: TextField(
+                                          controller: _durationController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    ElevatedButton(
+                                      onPressed: isRented ? null : _processRental,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isRented ? Colors.grey : darkGreen,
+                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                        elevation: 0,
+                                      ),
+                                      child: Text(
+                                        isRented ? 'Rented' : 'Proceed to Rent',
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -230,27 +266,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ),
             ),
 
-            // Rental Selection Section (Condition and Duration)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Select Rental Options', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: darkGreen)),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildChoiceSection('Condition', conditions, _selectedCondition, (val) => setState(() => _selectedCondition = val)),
-                      const SizedBox(width: 24),
-                      _buildChoiceSection('Duration', durations, _selectedDuration, (val) => setState(() => _selectedDuration = val)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
             // Short Description Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -259,29 +274,29 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.notes, color: Colors.black, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.notes, color: Colors.black, size: 22),
+                      SizedBox(width: 10),
                       Text(
                         'Short Description',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   const Divider(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     widget.book['description'] ?? 'No description available for this book.',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Color(0xFF4B5563),
-                      height: 1.6,
+                      height: 1.8,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 60),
           ],
         ),
       ),
@@ -300,37 +315,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1F2937))),
           const SizedBox(width: 8),
-          Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+          Text(value, style: const TextStyle(fontSize: 15, color: Color(0xFF4B5563))),
         ],
       ),
-    );
-  }
-
-  Widget _buildChoiceSection(String title, List<String> options, int selectedIndex, Function(int) onSelected) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: List.generate(options.length, (index) {
-            final isSelected = selectedIndex == index;
-            return ChoiceChip(
-              label: Text(options[index], style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontSize: 12)),
-              selected: isSelected,
-              selectedColor: darkGreen,
-              onSelected: (selected) => onSelected(index),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            );
-          }),
-        ),
-      ],
     );
   }
 

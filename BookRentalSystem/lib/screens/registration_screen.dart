@@ -19,6 +19,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,41 +30,80 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
+  void _showResultDialog(String title, String message, {bool isSuccess = false}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(title, style: TextStyle(color: isSuccess ? Colors.green : Colors.red, fontWeight: FontWeight.bold)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              if (isSuccess) {
+                _navigateToLogin();
+              }
+            },
+            child: const Text("OK", style: TextStyle(color: darkGreen, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(
+          email: _emailController.text,
+          password: _passwordController.text,
+        ),
+      ),
+    );
+  }
+
   Future<void> _register() async {
-    if (_formKey.currentState!.validate()) {
+    print("LOG: Register button pressed");
+    
+    if (!_formKey.currentState!.validate()) {
+      print("LOG: Validation failed");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    print("LOG: Sending data to server: Name=${_fullNameController.text}, Email=${_emailController.text}");
+
+    try {
       final result = await _authService.registerUser(
         fullName: _fullNameController.text,
         email: _emailController.text,
+        mobile: _mobileController.text,
         password: _passwordController.text,
       );
 
+      print("LOG: Server response received: $result");
+
       if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
 
       if (result == 'Success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration successful! Please log in.'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => LoginScreen(
-              email: _emailController.text,
-              password: _passwordController.text,
-            ),
-          ),
-        );
+        _showResultDialog("Success", "Registration successful! Click OK to go to Login.", isSuccess: true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showResultDialog("Registration Issue", result);
       }
+    } catch (e) {
+      print("LOG: Critical Error: $e");
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      _showResultDialog("Connection Error", "Could not reach the server. Make sure your Computer IP is correct in auth_service.dart and your phone is on the same Wi-Fi.\n\nDetails: $e");
     }
   }
 
@@ -87,7 +127,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                 child: Container(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withOpacity(0.3),
                 ),
               ),
               Center(
@@ -111,7 +151,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               Image.asset(
                                 'assets/images/logo.png',
                                 height: 60,
-                                color: Colors.white,
                               ),
                               const SizedBox(height: 16),
                               const Text(
@@ -160,6 +199,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   label: 'Mobile Number (without +91)',
                                   icon: Icons.phone_android_outlined,
                                   keyboardType: TextInputType.phone,
+                                  validator: (v) => v!.isEmpty ? 'Please enter mobile number' : null,
                                 ),
                                 const SizedBox(height: 16),
                                 _buildInputField(
@@ -178,27 +218,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 SizedBox(
                                   width: 200,
                                   child: ElevatedButton(
-                                    onPressed: _register,
+                                    onPressed: _isLoading ? null : _register,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: darkGreen,
                                       padding: const EdgeInsets.symmetric(vertical: 14),
                                       shape: const StadiumBorder(),
                                     ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.person_add_rounded, color: Colors.white, size: 20),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Register',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Register',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 24),

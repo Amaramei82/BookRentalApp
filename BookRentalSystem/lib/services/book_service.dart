@@ -3,7 +3,7 @@ import 'package:book_rental_system/models/book_model.dart';
 import 'package:http/http.dart' as http;
 
 class BookService {
-  static const String apiUrl = "http://192.168.100.1/book-rental-website/api/books.php";
+  static const String apiUrl = "http://192.168.100.1/book-rental-website/api/books";
 
   Future<List<Book>> fetchAvailableBooks() async {
     try {
