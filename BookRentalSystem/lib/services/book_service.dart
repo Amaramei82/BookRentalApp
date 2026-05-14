@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class BookService {
 
   static const String apiUrl =
-      "http://192.168.100.174:3001/books";
+      "http://192.168.1.114:3001/books";
 
   Future<List<Book>> fetchAvailableBooks() async {
 

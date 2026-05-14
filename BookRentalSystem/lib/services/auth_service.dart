@@ -21,9 +21,7 @@ class User {
 }
 
 class AuthService {
-  // ⚠️ IMPORTANT: Change 10.0.2.2 to your computer's Local IP (e.g. 192.168.1.XX) 
-  // if you are using a physical phone via USB.
-  static const String baseUrl = "http://192.168.100.174:3001";
+  static const String baseUrl = "http://192.168.1.114:3001";
 
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -72,26 +70,28 @@ class AuthService {
           'email': email.trim(),
           'password': password.trim(),
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
-      print("LOGIN RESPONSE: ${response.body}");
+      print("STATUS CODE: ${response.statusCode}");
+      print("RAW RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        print("DECODED DATA: $data");
+        print("DECODED RESPONSE: $data");
 
         if (data['success'] == true) {
+          print("LOGIN SUCCESS");
+
           return User.fromJson(data['user']);
+        } else {
+          print("LOGIN FAILED");
         }
       }
 
       return null;
-
     } catch (e) {
-
       print("LOGIN ERROR: $e");
-
       return null;
     }
   }

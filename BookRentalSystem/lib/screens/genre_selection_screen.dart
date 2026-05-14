@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:book_rental_system/theme/color.dart';
 import 'package:book_rental_system/screens/book_detail_screen.dart';
+import 'package:book_rental_system/screens/orders_screen.dart'; // Siguraduha nga imported kini
 
 class GenreSelectionScreen extends StatefulWidget {
   final Function(Map<String, String>, double) onOrderPlaced;
@@ -34,7 +35,6 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      // Trying to fetch from the PHP API as defined in the previous version
       const String apiUrl = "http://10.0.2.2/book-rental-website/api/api_get_categories.php";
       final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 5));
 
@@ -54,7 +54,6 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
   }
 
   void _useFallbackCategories() {
-    // Fallback: extract unique genres from the local book list
     final genres = widget.allBooks.map((b) => b['genre']!).toSet().toList();
     genres.sort();
     setState(() {
@@ -73,7 +72,7 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1F24), // Dark navbar from design
+        backgroundColor: const Color(0xFF1A1F24),
         elevation: 0,
         toolbarHeight: 70,
         leadingWidth: 100,
@@ -83,8 +82,12 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
         ),
         actions: [
           _buildHeaderLink('Home', onTap: () => Navigator.pop(context)),
-          _buildHeaderLink('Book Categories', isSelected: true),
-          _buildHeaderLink('Contact Us'),
+          _buildHeaderLink('Book Categories', isSelected: true), // Gidugangan og comma
+          _buildHeaderLink('My Orders', onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const OrdersScreen(orders: [], totalPrice: 0),
+            ));
+          }),
         ],
       ),
       body: Row(
@@ -121,44 +124,44 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
                   child: _isLoadingCategories
                       ? const Center(child: CircularProgressIndicator(color: darkGreen))
                       : ListView.builder(
-                          itemCount: _categories.length,
-                          itemBuilder: (context, index) {
-                            final category = _categories[index];
-                            final isSelected = _selectedCategory == category;
-                            return InkWell(
-                              onTap: () => setState(() => _selectedCategory = category),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? darkGreen.withValues(alpha: 0.05) : Colors.transparent,
-                                  border: isSelected ? const Border(left: BorderSide(color: darkGreen, width: 4)) : null,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.folder_open,
-                                      size: 16,
-                                      color: isSelected ? darkGreen : Colors.grey.shade600,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        category,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                          color: isSelected ? darkGreen : Colors.grey.shade700,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final category = _categories[index];
+                      final isSelected = _selectedCategory == category;
+                      return InkWell(
+                        onTap: () => setState(() => _selectedCategory = category),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: isSelected ? darkGreen.withOpacity(0.05) : Colors.transparent,
+                            border: isSelected ? const Border(left: BorderSide(color: darkGreen, width: 4)) : null,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.folder_open,
+                                size: 16,
+                                color: isSelected ? darkGreen : Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  category,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? darkGreen : Colors.grey.shade700,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -191,23 +194,23 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
                   child: filteredBooks.isEmpty
                       ? const Center(child: Text('No books found in this category'))
                       : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.65,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 20,
-                          ),
-                          itemCount: filteredBooks.length,
-                          itemBuilder: (context, index) {
-                            final book = filteredBooks[index];
-                            return _BookCard(
-                              book: book,
-                              onOrderPlaced: widget.onOrderPlaced,
-                              isRented: widget.isBookRented(book['title']!),
-                            );
-                          },
-                        ),
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 20,
+                    ),
+                    itemCount: filteredBooks.length,
+                    itemBuilder: (context, index) {
+                      final book = filteredBooks[index];
+                      return _BookCard(
+                        book: book,
+                        onOrderPlaced: widget.onOrderPlaced,
+                        isRented: widget.isBookRented(book['title']!),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -219,7 +222,7 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
 
   Widget _buildHeaderLink(String title, {bool isSelected = false, VoidCallback? onTap}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: TextButton(
         onPressed: onTap ?? () {},
         child: Text(
@@ -227,7 +230,7 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
           style: TextStyle(
             color: isSelected ? Colors.redAccent : Colors.white,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 13,
+            fontSize: 12,
           ),
         ),
       ),
@@ -254,7 +257,7 @@ class _BookCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

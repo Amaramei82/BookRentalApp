@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        width: 38,
+                        width: 40,
                         height: 38,
                         decoration: const BoxDecoration(
                           color: Color(0xFF3B82F6),
@@ -111,8 +111,6 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildHeroBanner(),
-            const SizedBox(height: 30),
             _buildSectionTitle(Icons.collections_bookmark, 'New Arrivals'),
             const SizedBox(height: 20),
             _buildBookGrid(filteredBooks, context),
@@ -145,32 +143,6 @@ class HomeScreen extends StatelessWidget {
           Text('Amara', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
           Icon(Icons.arrow_drop_down, color: Colors.white),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHeroBanner() {
-    return Container(
-      height: 220,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        image: DecorationImage(image: AssetImage('assets/images/home_background.jpg'), fit: BoxFit.cover),
-      ),
-      child: Container(
-        color: Colors.black.withOpacity(0.5),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('RENT BOOKS', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 10),
-            Text(
-              'Renting books saves you time, money,\nshelf space and the environment.',
-              style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 15, height: 1.4),
-            ),
-          ],
-        ),
       ),
     );
   }

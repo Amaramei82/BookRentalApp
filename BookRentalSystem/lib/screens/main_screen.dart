@@ -19,8 +19,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final _dataService = DataService();
-  // Ang _selectedIndex kay pabilin nato kung gusto pa nimo ang logic sa IndexedStack,
-  // pero sa pagkakaron, ang HomeScreen na ang main view.
   int _selectedIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, String>> _filteredBooks = [];
@@ -84,7 +82,6 @@ class _MainScreenState extends State<MainScreen> {
             valueListenable: _dataService.booksNotifier,
             builder: (context, allBooks, child) {
 
-              // Ang main screen karon diretso na sa HomeScreen
               return Scaffold(
                 backgroundColor: Colors.transparent,
                 body: Container(
@@ -98,8 +95,6 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                   ),
-                  // Imbis IndexedStack, gi-diretso na nato sa HomeScreen
-                  // kay ang navigation naa na sa upper navbar sa HomeScreen mismo.
                   child: HomeScreen(
                     searchController: _searchController,
                     filteredBooks: _filteredBooks,

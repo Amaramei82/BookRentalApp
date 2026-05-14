@@ -38,18 +38,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+
+      print("TRYING LOGIN...");
+
       final user = await _authService.loginUser(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
+      print("USER RESULT: $user");
+
       if (!mounted) return;
 
       if (user != null) {
+
+        print("NAVIGATING TO MAIN SCREEN");
+
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+          MaterialPageRoute(
+            builder: (context) => MainScreen(user: user),
+          ),
         );
+
       } else {
+
+        print("LOGIN RETURNED NULL");
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Incorrect email or password'),
@@ -60,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
