@@ -15,7 +15,7 @@ class User {
       id: json['id'].toString(),
       fullName: json['name'] ?? '',
       email: json['email'] ?? '',
-      mobile: json['mobile'] ?? '',
+      mobile: json['mobile'].toString(),
     );
   }
 }
@@ -72,16 +72,26 @@ class AuthService {
           'email': email.trim(),
           'password': password.trim(),
         }),
-      ).timeout(const Duration(seconds: 10));
+      );
+
+      print("LOGIN RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
+        print("DECODED DATA: $data");
+
         if (data['success'] == true) {
           return User.fromJson(data['user']);
         }
       }
+
       return null;
+
     } catch (e) {
+
+      print("LOGIN ERROR: $e");
+
       return null;
     }
   }
