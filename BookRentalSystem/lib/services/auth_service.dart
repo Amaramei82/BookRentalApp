@@ -23,7 +23,7 @@ class User {
 class AuthService {
   // ⚠️ IMPORTANT: Change 10.0.2.2 to your computer's Local IP (e.g. 192.168.1.XX) 
   // if you are using a physical phone via USB.
-  static const String baseUrl = "http://192.168.100.1";
+  static const String baseUrl = "http://192.168.100.174:3001";
 
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -40,10 +40,10 @@ class AuthService {
         Uri.parse("$baseUrl/register"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          'name': fullName,
-          'email': email,
-          'mobile': mobile,
-          'password': password,
+          'name': fullName.trim(),
+          'email': email.trim(),
+          'mobile': mobile.trim(),
+          'password': password.trim(),
         }),
       ).timeout(const Duration(seconds: 10)); // Stop waiting after 10 seconds
 
@@ -69,8 +69,8 @@ class AuthService {
         Uri.parse("$baseUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          'email': email,
-          'password': password,
+          'email': email.trim(),
+          'password': password.trim(),
         }),
       ).timeout(const Duration(seconds: 10));
 

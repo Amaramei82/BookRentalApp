@@ -71,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Set status bar style to dark icons on light background
+    // Set status bar style
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -88,25 +88,38 @@ class _MainScreenState extends State<MainScreen> {
           final double totalOrderPrice = confirmedOrders.isEmpty
               ? 0.0
               : confirmedOrders
-              .map((order) => order['price'] as double)
+              .map((order) => (order['price'] as num).toDouble())
               .reduce((a, b) => a + b);
 
           return ValueListenableBuilder<List<Map<String, String>>>(
             valueListenable: _dataService.booksNotifier,
             builder: (context, allBooks, child) {
-              // Use IndexedStack to preserve tab states and improve performance
               final List<Widget> widgetOptions = <Widget>[
                 HomeScreen(
                   searchController: _searchController,
                   filteredBooks: _filteredBooks,
                   allBooks: allBooks,
-                  onOrderPlaced: (book, price) => _dataService.addOrder(book, price, widget.user),
+                  onOrderPlaced: (book, price, {duration, address, paymentMethod}) => _dataService.addOrder(
+                    book: book,
+                    price: price,
+                    user: widget.user,
+                    duration: duration ?? '1 day',
+                    address: address ?? 'Not Provided',
+                    paymentMethod: paymentMethod ?? 'COD',
+                  ),
                   isBookRented: _dataService.isBookRented,
                 ),
                 SearchResultsScreen(
                   searchQuery: _searchQuery,
                   searchResults: _filteredBooks,
-                  onOrderPlaced: (book, price) => _dataService.addOrder(book, price, widget.user),
+                  onOrderPlaced: (book, price, {duration, address, paymentMethod}) => _dataService.addOrder(
+                    book: book,
+                    price: price,
+                    user: widget.user,
+                    duration: duration ?? '1 day',
+                    address: address ?? 'Not Provided',
+                    paymentMethod: paymentMethod ?? 'COD',
+                  ),
                   isBookRented: _dataService.isBookRented,
                 ),
                 OrdersScreen(
@@ -117,7 +130,6 @@ class _MainScreenState extends State<MainScreen> {
               ];
 
               return Scaffold(
-                // Soft gradient background for a modern look
                 backgroundColor: Colors.transparent,
                 body: Container(
                   decoration: const BoxDecoration(
@@ -141,7 +153,7 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),

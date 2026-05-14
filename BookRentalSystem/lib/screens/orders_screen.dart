@@ -10,137 +10,169 @@ class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Your Orders',
-          style: TextStyle(
-            color: darkGreen,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            letterSpacing: -0.3,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF1A1F24), // Dark top bar from design
         elevation: 0,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Colors.transparent],
-              stops: [0.0, 1.0],
-            ),
-          ),
+        toolbarHeight: 70,
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 40),
+            const Spacer(),
+            _buildHeaderLink('Home'),
+            _buildHeaderLink('Book Categories'),
+            _buildHeaderLink('Contact Us'),
+            _buildHeaderLink('My Orders', isSelected: true),
+          ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: orders.isEmpty
-                ? Center(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 50),
+            // "My Orders" Heading with icon
+            Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.receipt_long_outlined,
-                    size: 80,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No orders yet',
+                  const Icon(Icons.shopping_bag, size: 40, color: Color(0xFF1E40AF)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'My Orders',
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Your rented books will appear here',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1E40AF),
                     ),
                   ),
                 ],
               ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return TweenAnimationBuilder<double>(
-                  duration: Duration(milliseconds: 300 + (index * 50)),
-                  curve: Curves.easeOutCubic,
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value,
-                      child: Transform.translate(
-                        offset: Offset(0, 20 * (1 - value)),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _OrderItemCard(order: order),
-                );
-              },
             ),
-          ),
-          // Enhanced Total Section
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [darkGreen, darkGreen.withOpacity(0.8)],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: darkGreen.withOpacity(0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Total Rented Amount',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        '\$${totalPrice.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          letterSpacing: 0.5,
+            const SizedBox(height: 40),
+
+            // Tabular Orders List
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 48),
+                  child: Column(
+                    children: [
+                      // Table Header
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            _buildHeaderCell('ORDER ID', 100),
+                            _buildHeaderCell('ORDER DATE', 120),
+                            _buildHeaderCell('BOOK NAME', 220),
+                            _buildHeaderCell('PRICE', 100),
+                            _buildHeaderCell('DURATION', 100),
+                            _buildHeaderCell('ADDRESS', 200),
+                            _buildHeaderCell('PAYMENT METHOD', 180),
+                            _buildHeaderCell('PAYMENT STATUS', 150),
+                            _buildHeaderCell('ORDER STATUS', 150),
+                            _buildHeaderCell('ACTION', 100),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      // Table Rows
+                      if (orders.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(50),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: const Center(child: Text('No orders found.', style: TextStyle(color: Colors.grey))),
+                        )
+                      else
+                        ...orders.map((order) => _buildOrderRow(order)).toList(),
+                    ],
+                  ),
                 ),
+              ),
+            ),
+            const SizedBox(height: 80),
+
+            // Big Footer Section from design
+            _buildFooter(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderLink(String title, {bool isSelected = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: isSelected ? Colors.redAccent : Colors.white,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderCell(String label, double width) {
+    return SizedBox(
+      width: width,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF374151),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderRow(Map<String, dynamic> order) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(color: Colors.grey.shade200),
+          right: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+      child: Row(
+        children: [
+          _buildDataCell(order['id'] ?? '-', 100),
+          _buildDataCell(order['date'] ?? '-', 120),
+          _buildDataCell(order['title'] ?? '-', 220, isBold: true),
+          _buildDataCell('₹${order['price']}', 100),
+          _buildDataCell(order['duration'] ?? '1 day', 100),
+          _buildDataCell(order['address'] ?? 'Not Provided', 200),
+          _buildDataCell(order['payment_method'] ?? 'COD', 180),
+          SizedBox(
+            width: 150,
+            child: _buildBadge('success', const Color(0xFFD1FAE5), const Color(0xFF065F46)),
+          ),
+          SizedBox(
+            width: 150,
+            child: _buildBadge(order['status'] ?? 'Pending', const Color(0xFFDBEAFE), const Color(0xFF1E40AF)),
+          ),
+          SizedBox(
+            width: 100,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text('Cancel', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
               ),
             ),
           ),
@@ -148,177 +180,151 @@ class OrdersScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _OrderItemCard extends StatelessWidget {
-  final Map<String, dynamic> order;
-
-  const _OrderItemCard({required this.order});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      color: Colors.white,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+  Widget _buildDataCell(String value, double width, {bool isBold = false}) {
+    return SizedBox(
+      width: width,
+      child: Text(
+        value,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          color: const Color(0xFF1F2937),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              _buildImageWithStatus(),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order['title']!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        letterSpacing: -0.2,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            order['author']!,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade500),
-                        const SizedBox(width: 4),
-                        Text(
-                          order['date']!,
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: darkGreen.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '\$${(order['price'] as double).toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: darkGreen,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text, Color bgColor, Color textColor) {
+    return UnconstrainedBox(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text.toLowerCase(),
+          style: TextStyle(
+            color: textColor,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildImageWithStatus() {
-    Color statusColor;
-    String statusText = order['status'] ?? 'Unknown';
-
-    switch (statusText) {
-      case 'Rented':
-        statusColor = Colors.blue;
-        break;
-      case 'Returned':
-        statusColor = Colors.green;
-        break;
-      case 'Overdue':
-        statusColor = Colors.red;
-        break;
-      default:
-        statusColor = Colors.grey;
-    }
-
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Image.asset(
-            order['image']!,
-            width: 80,
-            height: 100,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 80,
-              height: 100,
-              color: Colors.grey.shade200,
-              child: const Icon(Icons.book, color: Colors.grey, size: 40),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [statusColor, statusColor.withOpacity(0.8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: statusColor.withOpacity(0.3),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+  Widget _buildFooter(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF1A1F24),
+      padding: const EdgeInsets.fromLTRB(40, 60, 40, 40),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Branding
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Image.asset('assets/images/logo.png', height: 40),
+                        const SizedBox(width: 10),
+                        const Text('Book Rental', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Online Books for rent', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Rent novels, academic & bestsellers at affordable prices.',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              statusText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.3,
               ),
-            ),
+              const SizedBox(width: 40),
+              // Explore
+              _buildFooterCol('Explore', ['Home', 'Categories', 'About Us', 'Contact']),
+              const SizedBox(width: 40),
+              // Legal
+              _buildFooterCol('Legal', ['Terms & Conditions', 'Privacy Policy']),
+              const SizedBox(width: 40),
+              // Connect
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Connect', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    _buildIconText(Icons.email, 'contact@bookrental.com'),
+                    const SizedBox(height: 10),
+                    _buildIconText(Icons.phone, '+91 1234567890'),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        _buildSocialIcon(Icons.facebook),
+                        const SizedBox(width: 10),
+                        _buildSocialIcon(Icons.camera_alt),
+                        const SizedBox(width: 10),
+                        _buildSocialIcon(Icons.alternate_email),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: 80),
+          const Divider(color: Colors.white10),
+          const SizedBox(height: 20),
+          const Text('© 2026 Book Rental. All Rights Reserved.', style: TextStyle(color: Colors.white24, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooterCol(String title, List<String> items) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          ...items.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(e, style: const TextStyle(color: Colors.white54, fontSize: 14)),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconText(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white54, size: 16),
+        const SizedBox(width: 10),
+        Text(text, style: const TextStyle(color: Colors.white54, fontSize: 13)),
       ],
+    );
+  }
+
+  Widget _buildSocialIcon(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: Colors.white70, size: 18),
     );
   }
 }

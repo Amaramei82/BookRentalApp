@@ -64,10 +64,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<void> _register() async {
-    print("LOG: Register button pressed");
+    debugPrint("LOG: Register process started");
     
     if (!_formKey.currentState!.validate()) {
-      print("LOG: Validation failed");
+      debugPrint("LOG: Validation failed");
       return;
     }
 
@@ -75,9 +75,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       _isLoading = true;
     });
 
-    print("LOG: Sending data to server: Name=${_fullNameController.text}, Email=${_emailController.text}");
-
     try {
+      debugPrint("LOG: Calling register API...");
       final result = await _authService.registerUser(
         fullName: _fullNameController.text,
         email: _emailController.text,
@@ -85,7 +84,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         password: _passwordController.text,
       );
 
-      print("LOG: Server response received: $result");
+      debugPrint("LOG: Server response: $result");
 
       if (!mounted) return;
       setState(() {
@@ -93,17 +92,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       });
 
       if (result == 'Success') {
-        _showResultDialog("Success", "Registration successful! Click OK to go to Login.", isSuccess: true);
+        _showResultDialog("Success", "Registration successful! You can now log in.", isSuccess: true);
       } else {
-        _showResultDialog("Registration Issue", result);
+        _showResultDialog("Error", result);
       }
     } catch (e) {
-      print("LOG: Critical Error: $e");
+      debugPrint("LOG: Caught Error: $e");
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      _showResultDialog("Connection Error", "Could not reach the server. Make sure your Computer IP is correct in auth_service.dart and your phone is on the same Wi-Fi.\n\nDetails: $e");
+      _showResultDialog("Connection Error", "Check your computer IP in auth_service.dart and ensure the phone is on the same Wi-Fi.\n\n$e");
     }
   }
 
@@ -151,6 +150,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               Image.asset(
                                 'assets/images/logo.png',
                                 height: 60,
+                                color: Colors.white,
                               ),
                               const SizedBox(height: 16),
                               const Text(
