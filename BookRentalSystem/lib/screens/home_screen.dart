@@ -287,8 +287,6 @@ class _BookCard extends StatelessWidget {
     } else if (imagePath.startsWith('assets/')) {
       return Image.asset(imagePath, fit: BoxFit.contain);
     } else {
-      // Sumpayan og saktong path. Kung ang imagePath kay 'media/books/test.jpg'
-      // ang resulta mahimong http://192.168.1.114:3001/media/books/test.jpg
       return Image.network(
         baseUrl + imagePath,
         fit: BoxFit.contain,
