@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:book_rental_system/screens/book_detail_screen.dart';
 import 'package:book_rental_system/screens/genre_selection_screen.dart';
 import 'package:book_rental_system/screens/profile_screen.dart';
+import 'package:book_rental_system/screens/orders_screen.dart'; // Siguraduha nga imported kini
 import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,7 @@ class HomeScreen extends StatelessWidget {
   final List<Map<String, String>> allBooks;
   final Function(Map<String, String>, double) onOrderPlaced;
   final bool Function(String) isBookRented;
-  final dynamic currentUser; // Pass user object here
+  final dynamic currentUser;
 
   const HomeScreen({
     super.key,
@@ -28,7 +29,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1F24), // Navbar color from Screenshot 2026-05-14 130408.png
+        backgroundColor: const Color(0xFF1A1F24),
         elevation: 4,
         toolbarHeight: 120,
         automaticallyImplyLeading: false,
@@ -66,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                         width: 38,
                         height: 38,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF3B82F6), // Blue search button
+                          color: Color(0xFF3B82F6),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.search, color: Colors.white, size: 18),
@@ -75,11 +76,12 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Profile Dropdown Style
+                // Profile Link
                 _buildProfileLink(context),
               ],
             ),
             const Divider(color: Colors.white12, height: 20),
+            // Navigation Bar - Gikuha na ang Contact Us
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -94,8 +96,12 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ));
                   }),
-                  _buildNavButton(Icons.email, 'Contact Us'),
-                  _buildNavButton(Icons.shopping_bag, 'My Orders'),
+                  _buildNavButton(Icons.shopping_bag, 'My Orders', onTap: () {
+                    // Navigate to Orders Screen
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const OrdersScreen(orders: [], totalPrice: 0), // I-adjust ang parameters base sa imong data
+                    ));
+                  }),
                 ],
               ),
             ),
