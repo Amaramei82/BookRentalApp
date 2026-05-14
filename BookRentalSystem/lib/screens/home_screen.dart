@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:book_rental_system/screens/book_detail_screen.dart';
 import 'package:book_rental_system/screens/genre_selection_screen.dart';
 import 'package:book_rental_system/screens/profile_screen.dart';
-import 'package:book_rental_system/screens/orders_screen.dart'; // Siguraduha nga imported kini
+import 'package:book_rental_system/screens/orders_screen.dart';
 import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF9FAFB), // Halos puti nga background para mo-pop ang mga cards
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1F24),
         elevation: 4,
@@ -39,7 +39,6 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Image.asset('assets/images/logo.png', height: 35),
                 const Spacer(),
-                // Integrated Search Bar
                 Container(
                   width: 180,
                   height: 38,
@@ -76,12 +75,10 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Profile Link
                 _buildProfileLink(context),
               ],
             ),
             const Divider(color: Colors.white12, height: 20),
-            // Navigation Bar - Gikuha na ang Contact Us
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -97,9 +94,8 @@ class HomeScreen extends StatelessWidget {
                     ));
                   }),
                   _buildNavButton(Icons.shopping_bag, 'My Orders', onTap: () {
-                    // Navigate to Orders Screen
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const OrdersScreen(orders: [], totalPrice: 0), // I-adjust ang parameters base sa imong data
+                      builder: (context) => const OrdersScreen(orders: [], totalPrice: 0),
                     ));
                   }),
                 ],
@@ -111,7 +107,8 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildSectionTitle(Icons.collections_bookmark, 'New Arrivals'),
+            const SizedBox(height: 20),
+            _buildSectionTitle(Icons.local_fire_department, 'Most Viewed'),
             const SizedBox(height: 20),
             _buildBookGrid(filteredBooks, context),
             const SizedBox(height: 40),
@@ -153,13 +150,13 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: const Color(0xFF1E40AF), size: 24),
+            Icon(icon, color: const Color(0xFF1E40AF), size: 28),
             const SizedBox(width: 8),
-            Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E40AF))),
+            Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF1E40AF))),
           ],
         ),
-        const SizedBox(height: 4),
-        Container(width: 60, height: 3, color: Colors.blueAccent),
+        const SizedBox(height: 6),
+        Container(width: 80, height: 4, color: const Color(0xFF3B82F6)),
       ],
     );
   }
@@ -172,9 +169,9 @@ class HomeScreen extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 15,
-          mainAxisSpacing: 15,
+          childAspectRatio: 0.65, // Gi-adjust para sa dugang button sa ubos
+          crossAxisSpacing: 20,
+          mainAxisSpacing: 20,
         ),
         itemCount: books.length,
         itemBuilder: (context, index) => _BookCard(
@@ -199,17 +196,94 @@ class _BookCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Expanded(child: Padding(padding: const EdgeInsets.all(8), child: Image.asset(book['image']!, fit: BoxFit.contain))),
-          Text(book['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center),
-          const Text('₹10 / day', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          // Book Image Section
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Hero(
+                  tag: 'book_${book['title']}',
+                  child: _buildImage(book['image']!),
+                ),
+              ),
+            ),
+          ),
+          // Book Title and Info Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              children: [
+                Text(
+                  book['title']!,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF111827)),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '₹10 / day',
+                  style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w900, fontSize: 14),
+                ),
+                const SizedBox(height: 10),
+                // View Details Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 34,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => BookDetailScreen(
+                            book: book,
+                            onOrderPlaced: onOrderPlaced,
+                            isBookRented: (title) => isRented,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline, size: 16, color: Color(0xFF1F2937)),
+                    label: const Text(
+                      'View Details',
+                      style: TextStyle(color: Color(0xFF1F2937), fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('http')) {
+      return Image.network(imagePath, fit: BoxFit.contain);
+    } else if (imagePath.startsWith('assets/')) {
+      return Image.asset(imagePath, fit: BoxFit.contain);
+    } else {
+      return Image.file(File(imagePath), fit: BoxFit.contain);
+    }
   }
 }

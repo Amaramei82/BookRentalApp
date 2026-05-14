@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 class BookService {
 
+  // CHANGE THIS TO YOUR CURRENT IPV4
   static const String apiUrl =
       "http://192.168.1.114:3001/books";
 
@@ -13,6 +14,7 @@ class BookService {
 
       final response = await http.get(Uri.parse(apiUrl));
 
+      print("BOOK STATUS: ${response.statusCode}");
       print("BOOK RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {

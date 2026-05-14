@@ -1,61 +1,53 @@
+import 'package:book_rental_system/models/book_model.dart';
 import 'package:book_rental_system/services/auth_service.dart';
+import 'package:book_rental_system/services/book_service.dart';
 import 'package:flutter/foundation.dart';
 
 class DataService {
+
   static final DataService _instance = DataService._internal();
+
   factory DataService() => _instance;
 
-  final ValueNotifier<List<Map<String, String>>> booksNotifier = ValueNotifier([]);
-  final ValueNotifier<List<Map<String, dynamic>>> ordersNotifier = ValueNotifier([]);
+  final BookService _bookService = BookService();
 
-  final List<Map<String, String>> _allBooks = const [
-    {
-      'image': 'assets/images/midnight_library.jpg',
-      'title': 'The Midnight Library',
-      'author': 'Matt Haig',
-      'genre': 'Science Fiction',
-      'description': 'A woman enters a magical library where each book shows a different version of her life.',
-    },
-    {
-      'image': 'assets/images/project_hail_mary.jpg',
-      'title': 'Project Hail Mary',
-      'author': 'Andy Weir',
-      'genre': 'Science Fiction',
-      'description': 'A lone astronaut must save humanity after waking up on a mysterious space mission.',
-    },
-    {
-      'image': 'assets/images/where_the_crawdads_sing.jpg',
-      'title': 'Where the Crawdads Sing',
-      'author': 'Delia Owens',
-      'genre': 'Historical Fiction',
-      'description': 'A young girl raised in the marsh becomes the prime suspect in a local murder.',
-    },
-    {
-      'image': 'assets/images/circe.jpg',
-      'title': 'Circe',
-      'author': 'Madeline Miller',
-      'genre': 'Fantasy',
-      'description': 'A retelling of the myth of Circe, the witch-goddess who discovers her own power.',
-    },
-    {
-      'image': 'assets/images/the_seven_husbands_of_evelyn_hugo.jpg',
-      'title': 'The Seven Husbands of Evelyn Hugo',
-      'author': 'Taylor Jenkins Reid',
-      'genre': 'Romance',
-      'description': 'An aging Hollywood icon reveals the truth behind her glamorous life and seven marriages.',
-    },
-    {
-      'image': 'assets/images/the_silent_patient.jpg',
-      'title': 'The Silent Patient',
-      'author': 'Alex Michaelides',
-      'genre': 'Thriller',
-      'description': 'A woman stops speaking after shooting her husband, and a therapist seeks the truth.',
-    },
-  ];
+  final ValueNotifier<List<Map<String, String>>> booksNotifier =
+  ValueNotifier([]);
+
+  final ValueNotifier<List<Map<String, dynamic>>> ordersNotifier =
+  ValueNotifier([]);
 
   DataService._internal() {
-    booksNotifier.value = _allBooks;
     ordersNotifier.value = [];
+    loadBooks();
+  }
+
+  Future<void> loadBooks() async {
+
+    try {
+
+      final List<Book> books =
+      await _bookService.fetchAvailableBooks();
+
+      booksNotifier.value = books.map((book) {
+
+        return {
+          'image': book.image,
+          'title': book.title,
+          'author': book.author,
+          'genre': book.genre,
+          'description': book.description,
+        };
+
+      }).toList();
+
+      print("BOOKS LOADED: ${booksNotifier.value.length}");
+
+    } catch (e) {
+
+      print("LOAD BOOK ERROR: $e");
+
+    }
   }
 
   void addOrder({
@@ -66,14 +58,19 @@ class DataService {
     String address = 'Not Provided',
     String paymentMethod = 'COD',
   }) {
+
     final now = DateTime.now();
-    final formattedDate = "${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year}";
-    
+
+    final formattedDate =
+        "${now.day.toString().padLeft(2, '0')}-"
+        "${now.month.toString().padLeft(2, '0')}-"
+        "${now.year}";
+
     final newOrder = {
       'id': '#${now.millisecondsSinceEpoch.toString().substring(10)}',
-      'image': book['image']!,
-      'title': book['title']!,
-      'author': book['author']!,
+      'image': book['image'] ?? '',
+      'title': book['title'] ?? '',
+      'author': book['author'] ?? '',
       'date': formattedDate,
       'price': price,
       'duration': duration,
@@ -83,15 +80,20 @@ class DataService {
       'payment_status': 'success',
       'user': user.fullName,
     };
-    
-    final currentOrders = List<Map<String, dynamic>>.from(ordersNotifier.value);
+
+    final currentOrders =
+    List<Map<String, dynamic>>.from(ordersNotifier.value);
+
     currentOrders.insert(0, newOrder);
+
     ordersNotifier.value = currentOrders;
   }
 
   bool isBookRented(String bookTitle) {
+
     return ordersNotifier.value.any((order) =>
-        order['title'] == bookTitle &&
-        (order['status'] == 'Rented' || order['status'] == 'Pending'));
+    order['title'] == bookTitle &&
+        (order['status'] == 'Rented' ||
+            order['status'] == 'Pending'));
   }
 }
