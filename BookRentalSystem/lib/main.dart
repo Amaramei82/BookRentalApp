@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_rental_system/screens/login_screen.dart';
 import 'package:book_rental_system/screens/registration_screen.dart';
 import 'package:book_rental_system/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(
       const Duration(seconds: 5),
       () => Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       ),
     );
   }

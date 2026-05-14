@@ -205,17 +205,20 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   }
 
   Widget _buildImage(String imagePath) {
-    // Logic para sa pag-display sa image gikan sa web (admin)
+    const String baseUrl = "http://192.168.1.114:3001/"; // I-add kini
+
     if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.book, size: 50, color: Colors.grey),
-      );
+      return Image.network(imagePath, fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => const Icon(Icons.book, size: 50, color: Colors.grey));
     } else if (imagePath.startsWith('assets/')) {
       return Image.asset(imagePath, fit: BoxFit.cover);
-    } else if (File(imagePath).existsSync()) {
-      return Image.file(File(imagePath), fit: BoxFit.cover);
+    } else if (imagePath.isNotEmpty && !imagePath.startsWith('assets')) {
+      // Kini para sa images gikan sa server
+      return Image.network(
+        baseUrl + imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+      );
     } else {
       return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
     }

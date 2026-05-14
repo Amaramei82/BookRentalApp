@@ -26,8 +26,11 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pananglitan: Ang "Most Viewed" kay ang unang 4 ka books lang
+    final mostViewedBooks = filteredBooks.take(4).toList();
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Halos puti nga background para mo-pop ang mga cards
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1F24),
         elevation: 4,
@@ -107,11 +110,26 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 30),
+
+            // SECTION 1: MOST VIEWED
+            _buildSectionTitle(Icons.local_fire_department, 'Most Viewed', Colors.orange),
             const SizedBox(height: 20),
-            _buildSectionTitle(Icons.local_fire_department, 'Most Viewed'),
-            const SizedBox(height: 20),
-            _buildBookGrid(filteredBooks, context),
+            _buildBookGrid(mostViewedBooks, context),
+
             const SizedBox(height: 40),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Divider(thickness: 1, color: Colors.black12),
+            ),
+            const SizedBox(height: 30),
+
+            // SECTION 2: NEW ARRIVALS
+            _buildSectionTitle(Icons.collections_bookmark, 'New Arrivals', const Color(0xFF1E40AF)),
+            const SizedBox(height: 20),
+            _buildBookGrid(filteredBooks, context), // Tanan filtered books
+
+            const SizedBox(height: 50),
           ],
         ),
       ),
@@ -144,24 +162,27 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(IconData icon, String title) {
+  Widget _buildSectionTitle(IconData icon, String title, Color color) {
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: const Color(0xFF1E40AF), size: 28),
+            Icon(icon, color: color, size: 26),
             const SizedBox(width: 8),
-            Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF1E40AF))),
+            Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
           ],
         ),
         const SizedBox(height: 6),
-        Container(width: 80, height: 4, color: const Color(0xFF3B82F6)),
+        Container(width: 60, height: 3, color: color.withOpacity(0.5)),
       ],
     );
   }
 
   Widget _buildBookGrid(List<Map<String, String>> books, BuildContext context) {
+    if (books.isEmpty) {
+      return const Center(child: Text("Walay libro nga nakit-an."));
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GridView.builder(
@@ -169,9 +190,9 @@ class HomeScreen extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.65, // Gi-adjust para sa dugang button sa ubos
-          crossAxisSpacing: 20,
-          mainAxisSpacing: 20,
+          childAspectRatio: 0.64,
+          crossAxisSpacing: 15,
+          mainAxisSpacing: 15,
         ),
         itemCount: books.length,
         itemBuilder: (context, index) => _BookCard(
@@ -196,79 +217,58 @@ class _BookCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
         children: [
-          // Book Image Section
           Expanded(
-            flex: 5,
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Hero(
-                  tag: 'book_${book['title']}',
-                  child: _buildImage(book['image']!),
-                ),
+                child: _buildImage(book['image']!),
               ),
             ),
           ),
-          // Book Title and Info Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               children: [
                 Text(
                   book['title']!,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF111827)),
-                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '₹10 / day',
-                  style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w900, fontSize: 14),
-                ),
-                const SizedBox(height: 10),
-                // View Details Button
+                const Text('₹10 / day', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 13)),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  height: 34,
-                  child: OutlinedButton.icon(
+                  height: 32,
+                  child: OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => BookDetailScreen(
-                            book: book,
-                            onOrderPlaced: onOrderPlaced,
-                            isBookRented: (title) => isRented,
-                          ),
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => BookDetailScreen(
+                          book: book,
+                          onOrderPlaced: onOrderPlaced,
+                          isBookRented: (title) => isRented,
                         ),
-                      );
+                      ));
                     },
-                    icon: const Icon(Icons.info_outline, size: 16, color: Color(0xFF1F2937)),
-                    label: const Text(
-                      'View Details',
-                      style: TextStyle(color: Color(0xFF1F2937), fontSize: 11, fontWeight: FontWeight.bold),
-                    ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: Colors.grey.shade300),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      padding: EdgeInsets.zero,
                     ),
+                    child: const Text('View Details', style: TextStyle(color: Colors.black87, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -278,12 +278,22 @@ class _BookCard extends StatelessWidget {
   }
 
   Widget _buildImage(String imagePath) {
+    // Siguraduha nga naay '/' sa tumoy sa baseUrl
+    const String baseUrl = "http://192.168.1.114:3001/";
+
     if (imagePath.startsWith('http')) {
-      return Image.network(imagePath, fit: BoxFit.contain);
+      return Image.network(imagePath, fit: BoxFit.contain,
+          errorBuilder: (c, e, s) => const Icon(Icons.broken_image));
     } else if (imagePath.startsWith('assets/')) {
       return Image.asset(imagePath, fit: BoxFit.contain);
     } else {
-      return Image.file(File(imagePath), fit: BoxFit.contain);
+      // Sumpayan og saktong path. Kung ang imagePath kay 'media/books/test.jpg'
+      // ang resulta mahimong http://192.168.1.114:3001/media/books/test.jpg
+      return Image.network(
+        baseUrl + imagePath,
+        fit: BoxFit.contain,
+        errorBuilder: (c, e, s) => const Icon(Icons.book, color: Colors.grey),
+      );
     }
   }
 }
