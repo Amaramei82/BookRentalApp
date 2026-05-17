@@ -35,13 +35,13 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      const String apiUrl = "http://10.0.2.2/book-rental-website/api/api_get_categories.php";
+      const String apiUrl = "http://192.168.1.114:3001/categories";
       final response = await http.get(Uri.parse(apiUrl)).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          _categories = data.map((e) => e['name'].toString()).toList();
+          _categories = data.map((e) => e['category'].toString()).toList();
           if (_categories.isNotEmpty) _selectedCategory = _categories[0];
           _isLoadingCategories = false;
         });
