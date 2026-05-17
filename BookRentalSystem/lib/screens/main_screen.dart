@@ -1,41 +1,50 @@
 import 'package:book_rental_system/screens/home_screen.dart';
-import 'package:book_rental_system/screens/orders_screen.dart';
-import 'package:book_rental_system/screens/profile_screen.dart';
-import 'package:book_rental_system/screens/search_results_screen.dart';
 import 'package:book_rental_system/services/auth_service.dart';
 import 'package:book_rental_system/services/data_service.dart';
-import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
 
-  const MainScreen({super.key, required this.user});
+  const MainScreen({
+    super.key,
+    required this.user,
+  });
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final _dataService = DataService();
+  final DataService _dataService = DataService();
+
+  final TextEditingController _searchController =
+  TextEditingController();
+
   int _selectedIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
+
   List<Map<String, String>> _filteredBooks = [];
+
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+
     _filteredBooks = _dataService.booksNotifier.value;
+
     _dataService.booksNotifier.addListener(_updateBooks);
+
     _searchController.addListener(_filterBooks);
   }
 
   @override
   void dispose() {
     _dataService.booksNotifier.removeListener(_updateBooks);
+
     _searchController.dispose();
+
     super.dispose();
   }
 
@@ -47,15 +56,24 @@ class _MainScreenState extends State<MainScreen> {
 
   void _filterBooks() {
     final query = _searchController.text.toLowerCase();
+
     final allBooks = _dataService.booksNotifier.value;
+
     setState(() {
       _searchQuery = _searchController.text;
+
       _filteredBooks = query.isEmpty
           ? allBooks
           : allBooks.where((book) {
-        final title = book['title']!.toLowerCase();
-        final author = book['author']!.toLowerCase();
-        final genre = book['genre']!.toLowerCase();
+        final title =
+        (book['title'] ?? '').toLowerCase();
+
+        final author =
+        (book['author'] ?? '').toLowerCase();
+
+        final genre =
+        (book['genre'] ?? '').toLowerCase();
+
         return title.contains(query) ||
             author.contains(query) ||
             genre.contains(query);
@@ -81,7 +99,6 @@ class _MainScreenState extends State<MainScreen> {
           return ValueListenableBuilder<List<Map<String, String>>>(
             valueListenable: _dataService.booksNotifier,
             builder: (context, allBooks, child) {
-
               return Scaffold(
                 backgroundColor: Colors.transparent,
                 body: Container(
@@ -99,16 +116,35 @@ class _MainScreenState extends State<MainScreen> {
                     searchController: _searchController,
                     filteredBooks: _filteredBooks,
                     allBooks: allBooks,
-                    currentUser: widget.user, // Gi-pass ang user para sa profile link
-                    onOrderPlaced: (book, price, {duration, address, paymentMethod}) => _dataService.addOrder(
-                      book: book,
-                      price: price,
-                      user: widget.user,
-                      duration: duration ?? '1 day',
-                      address: address ?? 'Not Provided',
-                      paymentMethod: paymentMethod ?? 'COD',
-                    ),
-                    isBookRented: _dataService.isBookRented,
+
+                    // FIXED HERE
+                    currentUser: {
+                      "id": widget.user.id,
+                      "name": widget.user.fullName,
+                      "email": widget.user.email,
+                    },
+
+                    onOrderPlaced:
+                        (
+                        book,
+                        price, {
+                      duration,
+                      address,
+                      paymentMethod,
+                    }) =>
+                        _dataService.addOrder(
+                          book: book,
+                          price: price,
+                          user: widget.user,
+                          duration: duration ?? '1 day',
+                          address:
+                          address ?? 'Not Provided',
+                          paymentMethod:
+                          paymentMethod ?? 'COD',
+                        ),
+
+                    isBookRented:
+                    _dataService.isBookRented,
                   ),
                 ),
               );

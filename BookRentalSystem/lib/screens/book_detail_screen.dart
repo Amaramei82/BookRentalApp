@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:book_rental_system/screens/checkout_screen.dart';
 import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +6,14 @@ class BookDetailScreen extends StatefulWidget {
   final Map<String, String> book;
   final Function(Map<String, String>, double) onOrderPlaced;
   final bool Function(String) isBookRented;
+  final Map<String, dynamic> currentUser;
 
   const BookDetailScreen({
     super.key,
     required this.book,
     required this.onOrderPlaced,
     required this.isBookRented,
+    required this.currentUser,
   });
 
   @override
@@ -46,6 +47,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           book: widget.book,
           duration: duration,
           onOrderPlaced: widget.onOrderPlaced,
+          currentUser: widget.currentUser,
         ),
       ),
     );
@@ -75,7 +77,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
                   ],
                 ),
                 padding: const EdgeInsets.all(20),
@@ -88,7 +90,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4)),
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4)),
                           ],
                         ),
                         child: ClipRRect(

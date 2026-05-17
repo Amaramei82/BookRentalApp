@@ -10,12 +10,14 @@ class GenreSelectionScreen extends StatefulWidget {
   final Function(Map<String, String>, double) onOrderPlaced;
   final bool Function(String) isBookRented;
   final List<Map<String, String>> allBooks;
+  final Map<String, dynamic> currentUser;
 
   const GenreSelectionScreen({
     super.key,
     required this.onOrderPlaced,
     required this.isBookRented,
     required this.allBooks,
+    required this.currentUser,
   });
 
   @override
@@ -208,6 +210,7 @@ class _GenreSelectionScreenState extends State<GenreSelectionScreen> {
                         book: book,
                         onOrderPlaced: widget.onOrderPlaced,
                         isRented: widget.isBookRented(book['title']!),
+                        currentUser: widget.currentUser,
                       );
                     },
                   ),
@@ -242,11 +245,13 @@ class _BookCard extends StatelessWidget {
   final Map<String, String> book;
   final Function(Map<String, String>, double) onOrderPlaced;
   final bool isRented;
+  final Map<String, dynamic> currentUser; // ADD
 
   const _BookCard({
     required this.book,
     required this.onOrderPlaced,
     required this.isRented,
+    required this.currentUser, // ADD
   });
 
   @override
@@ -306,6 +311,7 @@ class _BookCard extends StatelessWidget {
                             book: book,
                             onOrderPlaced: onOrderPlaced,
                             isBookRented: (title) => isRented,
+                            currentUser: currentUser,
                           ),
                         ),
                       );

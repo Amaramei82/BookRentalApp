@@ -1,17 +1,21 @@
 import 'package:book_rental_system/screens/order_confirmed_screen.dart';
 import 'package:book_rental_system/theme/color.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CheckoutScreen extends StatefulWidget {
   final Map<String, String> book;
   final int duration;
   final Function(Map<String, String>, double) onOrderPlaced;
+  final Map<String, dynamic> currentUser;
 
   const CheckoutScreen({
     super.key,
     required this.book,
     required this.duration,
     required this.onOrderPlaced,
+    required this.currentUser,
   });
 
   @override
@@ -152,16 +156,107 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    widget.onOrderPlaced(widget.book, totalAmount);
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => OrderConfirmedScreen(
-                          orderNumber: DateTime.now().millisecondsSinceEpoch.toString().substring(8),
+
+                    const double rentPricePerDay = 10.0;
+                    final double totalRent =
+                        rentPricePerDay * widget.duration;
+
+                    const double securityDeposit = 150.0;
+
+                    final double totalAmount =
+                        totalRent + securityDeposit;
+
+                    try {
+
+                      final response = await http.post(
+                        Uri.parse(
+                          "http://192.168.1.114:3001/orders/place",
                         ),
-                      ),
-                    );
+
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+
+                        body: jsonEncode({
+
+                          "user_id": widget.currentUser["id"],
+
+                          "address":
+                          _addressLine1Controller.text,
+
+                          "address2":
+                          _addressLine2Controller.text,
+
+                          "pin":
+                          _pinCodeController.text,
+
+                          "payment_method": "COD",
+
+                          "total": totalAmount,
+
+                          "duration":
+                          "${widget.duration} days",
+
+                          "book_id":
+                          widget.book["id"],
+
+                          "price":
+                          totalRent,
+                        }),
+                      );
+
+                      final data = jsonDecode(response.body);
+
+                      if (data["success"] == true) {
+
+                        widget.onOrderPlaced(
+                          widget.book,
+                          totalAmount,
+                        );
+
+                        if (mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  OrderConfirmedScreen(
+                                    orderNumber:
+                                    data["order_id"].toString(),
+                                  ),
+                            ),
+                          );
+                        }
+
+                      } else {
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                data["message"] ??
+                                    "Order failed",
+                              ),
+                            ),
+                          );
+                        }
+                      }
+
+                    } catch (e) {
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "Error: $e",
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   }
                 },
                 icon: const Icon(Icons.check_circle, color: Colors.white),

@@ -148,31 +148,77 @@ class OrdersScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildDataCell(order['id'] ?? '-', 100),
-          _buildDataCell(order['date'] ?? '-', 120),
-          _buildDataCell(order['title'] ?? '-', 220, isBold: true),
-          _buildDataCell('₹${order['price']}', 100),
-          _buildDataCell(order['duration'] ?? '1 day', 100),
-          _buildDataCell(order['address'] ?? 'Not Provided', 200),
-          _buildDataCell(order['payment_method'] ?? 'COD', 180),
+          _buildDataCell(order['id'].toString(), 100),
+
+          _buildDataCell(
+            order['date']?.toString() ?? '-',
+            120,
+          ),
+
+          _buildDataCell(
+            order['book_name']?.toString() ?? '-',
+            220,
+            isBold: true,
+          ),
+
+          _buildDataCell(
+            '₹${order['price']?.toString() ?? '0'}',
+            100,
+          ),
+
+          _buildDataCell(
+            order['duration']?.toString() ?? '1 day',
+            100,
+          ),
+
+          _buildDataCell(
+            order['address']?.toString() ?? 'Not Provided',
+            200,
+          ),
+
+          _buildDataCell(
+            order['payment_method']?.toString() ?? 'COD',
+            180,
+          ),
+
           SizedBox(
             width: 150,
-            child: _buildBadge('success', const Color(0xFFD1FAE5), const Color(0xFF065F46)),
+            child: _buildBadge(
+              order['payment_status']?.toString() ?? 'Pending',
+              const Color(0xFFD1FAE5),
+              const Color(0xFF065F46),
+            ),
           ),
+
           SizedBox(
             width: 150,
-            child: _buildBadge(order['status'] ?? 'Pending', const Color(0xFFDBEAFE), const Color(0xFF1E40AF)),
+            child: _buildBadge(
+              order['status_name']?.toString() ?? 'Pending',
+              const Color(0xFFDBEAFE),
+              const Color(0xFF1E40AF),
+            ),
           ),
+
           SizedBox(
             width: 100,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text('Cancel', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
