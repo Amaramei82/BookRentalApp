@@ -13,7 +13,7 @@ class BookListPage extends StatelessWidget {
         title: const Text("Books"),
         centerTitle: true,
       ),
-      body: ValueListenableBuilder<List<Map<String, String>>>(
+      body: ValueListenableBuilder<List<Map<String, dynamic>>>(
         valueListenable: dataService.booksNotifier,
         builder: (context, books, child) {
           if (books.isEmpty) {

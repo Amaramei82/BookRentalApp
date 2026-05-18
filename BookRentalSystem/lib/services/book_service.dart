@@ -6,7 +6,7 @@ class BookService {
 
   // CHANGE THIS TO YOUR CURRENT IPV4
   static const String apiUrl =
-      "http://192.168.1.114:3001/books";
+      "http://192.168.100.16:3001/books";
 
   Future<List<Book>> fetchAvailableBooks() async {
 

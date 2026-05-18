@@ -196,7 +196,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 const SizedBox(height: 16),
                                 _buildInputField(
                                   controller: _mobileController,
-                                  label: 'Mobile Number (without +91)',
+                                  label: 'Mobile Number',
                                   icon: Icons.phone_android_outlined,
                                   keyboardType: TextInputType.phone,
                                   validator: (v) => v!.isEmpty ? 'Please enter mobile number' : null,

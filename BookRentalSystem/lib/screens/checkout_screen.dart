@@ -8,14 +8,12 @@ class CheckoutScreen extends StatefulWidget {
   final Map<String, String> book;
   final int duration;
   final Function(Map<String, String>, double) onOrderPlaced;
-  final Map<String, dynamic> currentUser;
 
   const CheckoutScreen({
     super.key,
     required this.book,
     required this.duration,
     required this.onOrderPlaced,
-    required this.currentUser,
   });
 
   @override
@@ -25,13 +23,11 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressLine1Controller = TextEditingController();
-  final _addressLine2Controller = TextEditingController();
   final _pinCodeController = TextEditingController();
 
   @override
   void dispose() {
     _addressLine1Controller.dispose();
-    _addressLine2Controller.dispose();
     _pinCodeController.dispose();
     super.dispose();
   }
@@ -128,8 +124,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 24),
             _buildTextField('Address Line 1', 'Street, House No., Area', _addressLine1Controller),
             const SizedBox(height: 16),
-            _buildTextField('Address Line 2 (Optional)', 'Landmark, Near by', _addressLine2Controller),
-            const SizedBox(height: 16),
             _buildTextField('Pin Code', '246401', _pinCodeController, keyboardType: TextInputType.number),
             const SizedBox(height: 24),
             const Text('Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -167,41 +161,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                     final double totalAmount =
                         totalRent + securityDeposit;
-
                     try {
-
                       final response = await http.post(
                         Uri.parse(
                           "http://192.168.1.114:3001/orders/place",
                         ),
-
                         headers: {
                           "Content-Type": "application/json",
                         },
 
                         body: jsonEncode({
-
-                          "user_id": widget.currentUser["id"],
-
+                          "user_id": 1,
                           "address":
                           _addressLine1Controller.text,
-
-                          "address2":
-                          _addressLine2Controller.text,
-
                           "pin":
                           _pinCodeController.text,
-
                           "payment_method": "COD",
-
                           "total": totalAmount,
-
                           "duration":
                           "${widget.duration} days",
-
-                          "book_id":
-                          widget.book["id"],
-
+                          "book_id": int.parse(widget.book["id"].toString()),
                           "price":
                           totalRent,
                         }),
@@ -210,52 +189,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       final data = jsonDecode(response.body);
 
                       if (data["success"] == true) {
-
                         widget.onOrderPlaced(
                           widget.book,
                           totalAmount,
                         );
 
-                        if (mounted) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  OrderConfirmedScreen(
-                                    orderNumber:
-                                    data["order_id"].toString(),
-                                  ),
-                            ),
-                          );
-                        }
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                OrderConfirmedScreen(
+                                  orderNumber:
+                                  data["order_id"].toString(),
+                                ),
+                          ),
+                        );
 
                       } else {
-
-                        if (mounted) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                data["message"] ??
-                                    "Order failed",
-                              ),
-                            ),
-                          );
-                        }
-                      }
-
-                    } catch (e) {
-
-                      if (mounted) {
                         ScaffoldMessenger.of(context)
                             .showSnackBar(
                           SnackBar(
                             content: Text(
-                              "Error: $e",
+                              data["message"] ??
+                                  "Order failed",
                             ),
                           ),
                         );
                       }
+
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("ORDER ERROR: $e"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+
+                      print("ORDER ERROR: $e");
                     }
                   }
                 },

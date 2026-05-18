@@ -1,4 +1,5 @@
 class Book {
+  final int id;
   final String image;
   final String title;
   final String author;
@@ -6,6 +7,7 @@ class Book {
   final String description;
 
   Book({
+    required this.id,
     required this.image,
     required this.title,
     required this.author,
@@ -15,6 +17,7 @@ class Book {
 
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
+      id: json['id'],
       image: json['img_url'] ?? '',
       title: json['name'] ?? '',
       author: json['author'] ?? '',

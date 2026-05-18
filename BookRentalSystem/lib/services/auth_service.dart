@@ -21,7 +21,7 @@ class User {
 }
 
 class AuthService {
-  static const String baseUrl = "http://192.168.1.114:3001";
+  static const String baseUrl = "http://192.168.100.16:3001";
 
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
@@ -39,20 +39,22 @@ class AuthService {
         headers: {"Content-Type": "application/json"},
         body: json.encode({
           'name': fullName.trim(),
-          'email': email.trim(),
+          'email': email.trim().toLowerCase(), // Force match with lowercasing
           'mobile': mobile.trim(),
           'password': password.trim(),
         }),
-      ).timeout(const Duration(seconds: 10)); // Stop waiting after 10 seconds
+      ).timeout(const Duration(seconds: 10));
+
+      final data = json.decode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = json.decode(response.body);
         return data['success'] == true ? 'Success' : (data['message'] ?? 'Registration failed');
       } else {
-        return "Server error: ${response.statusCode}";
+        // Correctly capture structural error messages from the backend
+        return data['message'] ?? data['error'] ?? "Server error: ${response.statusCode}";
       }
     } on TimeoutException {
-      return "Connection timed out. Check your IP address and Server.";
+      return "Connection timed out. Check your IP address and Server status.";
     } catch (e) {
       return "Connection error: $e";
     }
@@ -67,28 +69,17 @@ class AuthService {
         Uri.parse("$baseUrl/login"),
         headers: {"Content-Type": "application/json"},
         body: json.encode({
-          'email': email.trim(),
+          'email': email.trim().toLowerCase(),
           'password': password.trim(),
         }),
       ).timeout(const Duration(seconds: 10));
 
-      print("STATUS CODE: ${response.statusCode}");
-      print("RAW RESPONSE: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
-        print("DECODED RESPONSE: $data");
-
         if (data['success'] == true) {
-          print("LOGIN SUCCESS");
-
           return User.fromJson(data['user']);
-        } else {
-          print("LOGIN FAILED");
         }
       }
-
       return null;
     } catch (e) {
       print("LOGIN ERROR: $e");
